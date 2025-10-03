@@ -3,7 +3,6 @@ package rawdata
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -92,7 +91,7 @@ func ReadContent(value string) (Format, []byte, error) {
 			return format, nil, fmt.Errorf("'%s' is a directory, not a file", filename)
 		}
 		// read into memory
-		content, err = ioutil.ReadFile(filename)
+		content, err = os.ReadFile(filename)
 		if err != nil {
 			return format, nil, fmt.Errorf("error reading file '%s': %w", filename, err)
 		}
