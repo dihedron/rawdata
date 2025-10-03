@@ -50,7 +50,7 @@ func (c *CustomFlagType1) UnmarshalFlag(value string) error {
 
 The less trivial use case is when the exact type of the input data is not perfectly known in advance or it varies depending on e.g. a `type` field.
 
-In tgis case you can use the `Unmarshal` function, which is more lax with repsect to `UnmarshalInto`: it detects the type of entity (object/array) in the input and *returns* either a `map[string]interface{}` (if the input value is an object) or a `[]interface{}` if the input is an array of objects. It is up to the caller to handle the two cases properly, and this leaves the possibility of using e.g. such tools as Mitchell Hashimoto's [Map Structure](https://github.com/mitchellh/mapstructure) library to perform the final unmarshalling into the destination data structure, possibly with some switching logic. Overall, this provides a way to perform a smarter, adaptive staged unmarshalling where you oartially unmarshall into an intermediate data structure, analyse it and decide what to do next.
+In this case you can use the `Unmarshal` function, which is more lax with respect to `UnmarshalInto`: it detects the type of entity (object/array) in the input and *returns* either a `map[string]any` (if the input value is an object) or a `[]any` if the input is an array of objects. It is up to the caller to handle the two cases properly, and this leaves the possibility of using e.g. such tools as Mitchell Hashimoto's [Map Structure](https://github.com/mitchellh/mapstructure) library to perform the final unmarshalling into the destination data structure, possibly with some switching logic. Overall, this provides a way to perform a smarter, adaptive staged unmarshalling where you partially unmarshall into an intermediate data structure, analyse it and decide what to do next.
 
 ```golang
 type CustomFlagType2 struct {
@@ -60,12 +60,12 @@ type CustomFlagType2 struct {
 func (c *CustomFlagType2) UnmarshalFlag(value string) error {
     var err error
     data, err = rawdata.Unmarshal(value)
-    // after this call, data may contain a map[string]interface{} 
-    // or a []interface{}, depending on whether the input is a 
+    // after this call, data may contain a map[string]any 
+    // or a []any, depending on whether the input is a 
     // JSON/YAML object or an array; you can hook your custom 
     // unmarshalling logic here
     switch data := data.(type) {
-    case map[string]interface{}:
+    case map[string]any:
         // it's a map, switch on the "type" field
         // retrieve the "type" value and cast it to string, 
         if v, ok := data["type"] ; ok {
@@ -83,7 +83,7 @@ func (c *CustomFlagType2) UnmarshalFlag(value string) error {
                 }
             }
         }
-    case []interface{}:
+    case []any:
         // logic to handle arrays here
 	default:
 		return errors.New("unexpected type of returned data")
